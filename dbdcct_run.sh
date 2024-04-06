@@ -9,10 +9,10 @@ setChk="/Users/$currentUser/Library/Preferences/$prefList"
 if [ ! -f "$setChk" ] && touch "$setChk"
 
 # Check for newGame flag
-newGame=$(defaults read "$setChk" newGame)
+newGame=$(/usr/bin/defaults read "$setChk" newGame)
 if [ "$newGame" == 1 ]; then
     # Start game
-    userName=$(defaults read "$setChk" encodedUsername | base64 -D)
+    userName=$(/usr/bin/defaults read "$setChk" encodedUsername | base64 -D)
     echo "Welcome back, $userName"
 else
     echo "No existing settings detected."
@@ -28,14 +28,21 @@ else
         # Encrypt userName in base64 before writing to plist
         echo "$userName"
         encodedUsername=$(echo "$userName" | base64)
+        false="false"
         echo "Thanks for saving your game, $userName"
-        defaults write "$setChk" userName -string "$userName"
-        defaults write "$setChk" encodedUsername -string "$encodedUsername"
-        defaults write "$setChk" newGame -int 1
-        defaults write "$setChk" setDone -int 0
-        defaults write "$setChk" basePoints -int 12
-        defaults write "$setChk" usedPoints -int 0
-
+        /usr/bin/defaults write "$setChk" userName -string "$userName"
+        /usr/bin/defaults write "$setChk" encodedUsername -string "$encodedUsername"
+        /usr/bin/defaults write "$setChk" newGame -int 1
+        /usr/bin/defaults write "$setChk" setDone -int 0
+        /usr/bin/defaults write "$setChk" basePoints -int 0
+        /usr/bin/defaults write "$setChk" usedPoints -int 0
+        /usr/bin/defaults write "$setChk" avatarRace -string "$false"
+        /usr/bin/defaults write "$setChk" avatarGender -string "$false"
+        /usr/bin/defaults write "$setChk" avatarClass -string "$false"
+        /usr/bin/defaults write "$setChk" raceCode -string 00
+        /usr/bin/defaults write "$setChk" classCode -string 00
+        /usr/bin/defaults write "$setChk" classAttrib -int 0
+        /usr/bin/defaults write "$setChk" raceAttrib -int 0
     fi
 
     # Print the user's name
@@ -43,7 +50,7 @@ else
 fi
 
 # Start the Dragon Breath Dungeon™ character creation tool
-setDone=$(defaults read "$setChk" setDone)
+setDone=$(/usr/bin/defaults read "$setChk" setDone)
 if [[ "$setDone" == 0 ]]; then
     # Continue
     echo "Dragon Breath Dungeon™ character creation tool continuing"
@@ -59,7 +66,7 @@ fi
 echo "Starting the Dragon Breath Dungeon™ avatar creation tool"
 
 # Define avatar name
-avatarName=$(defaults read "$setChk" avatarName)
+avatarName=$(/usr/bin/defaults read "$setChk" avatarName)
 
 # Check Avatar Name
     if [[ -z "$avatarName" ]]; then
@@ -73,9 +80,9 @@ avatarName=$(defaults read "$setChk" avatarName)
         # Encrypt userName in base64 before writing to plist
         echo "Avatar name: $avatarName"
         echo "Thanks for choosing your avatar name, $avatarName, $userName"
-        defaults write "$setChk" avatarName -string "$avatarName"
+        /usr/bin/defaults write "$setChk" avatarName -string "$avatarName"
         encodedAvatar=$(echo "$avatarName" | base64)
-        defaults write "$setChk" encodedAvatar "$encodedAvatar"
+        /usr/bin/defaults write "$setChk" encodedAvatar "$encodedAvatar"
     fi
 else
 echo "Thanks for returning, $userName, your avatar, $avatarName, is ready to set up"
@@ -85,203 +92,313 @@ echo "username: $userName"
 echo "avatarname: $avatarName"
 else
 echo "Failure"
+echo "Failure"
+echo "Failure"
+echo "Failure"
 exit 222 ### No clue what happened
 fi
 
 ### Define race name
-myRace=$(defaults read "$setChk" myRace)
+avatarRace=$(/usr/bin/defaults read "$setChk" avatarRace)
 
 ### Check Avatar Race
-if [[ -z "$myRace" ]]; then
+if [[ "$avatarRace" == "false" ]]; then
 ### Open a dialog box and ask the user for their avatar's race
-myRace=$(osascript -e 'tell application "System Events" to choose from list {"Human", "Elf", "Draco", "Titon"} with prompt "What race will you be?"')
-defaults write "$setChk" myRace -string "$myRace"
-else
-    echo "You selected: $myRace"
+avatarRace=$(osascript -e 'tell application "System Events" to choose from list {"Human", "Elf", "Draco", "Titon"} with prompt "What race will you be?"')
+/usr/bin/defaults write "$setChk" avatarRace -string "$avatarRace"
+# Check if the user entered an avatar race
+    if [[ "$avatarRace" == "false" ]]; then
+        echo "No avatar race entered. Exiting."
+        exit 1
+    else
+        echo "You selected: $avatarRace"
+        /usr/bin/defaults write "$setChk" avatarRace -string "$avatarRace"
+    fi
 fi
 
 ### Define Avatar Gender
-myRace=$(defaults read "$setChk" myRace)
+avatarGender=$(/usr/bin/defaults read "$setChk" avatarGender)
 
 ### Check Avatar Gender
-if [[ -z "$myGender" ]]; then
+if [[ "$avatarGender" == "false" ]]; then
 ### Open a dialog box and ask the user for their avatar's gender
-myRace=$(osascript -e 'tell application "System Events" to choose from list {"Non Binary", "Female", "Male"} with prompt "What gender will you be?"')
-defaults write "$setChk" myGender -string "$myGender"
-else
-    echo "You selected: $myGender"
+avatarGender=$(osascript -e 'tell application "System Events" to choose from list {"NonBinary", "Female", "Male"} with prompt "What gender will you be?"')
+echo "Avatar genger: $avatarGender"
+/usr/bin/defaults write "$setChk" avatarGender -string "$avatarGender"
+# Check if the user entered an avatar race
+    if [[ "$avatarGender" == "false" ]]; then
+        echo "No avatar gender entered. Exiting."
+        exit 1
+    else
+        echo "You selected: $avatarGender"
+        /usr/bin/defaults write "$setChk" avatarGender -string "$avatarGender"
+    fi
+    
 fi
 
 ### Define Avatar Class
-myClass=$(defaults read "$setChk" myClass)
+avatarClass=$(/usr/bin/defaults read "$setChk" avatarClass)
 
 ### Choose Class
-if [[ -z "$myClass" ]]; then
+if [[ "$avatarClass" == "false" ]]; then
 ### Open a dialog box and ask the user for their avatar's class
-myClass=$(osascript -e 'tell application "System Events" to choose from list {"Warrior", "Thief", "Archer", "Magika"} with prompt "What class will you be?"')
-defaults write "$setChk" myClass -string "$myClass"
-else
-if [[ "$myClass" == "false" ]]; then
-myClass=$(osascript -e 'tell application "System Events" to choose from list {"Warrior", "Thief", "Archer", "Magika"} with prompt "What Class will you be?"')
-defaults write "$setChk" myClass -string "$myClass"
-else
-    defaults write "$setChk" myClass "$myClass"
-fi
-    echo "You selected: $myClass"
-    defaults write "$setChk" myClass "$myClass"
+avatarClass=$(osascript -e 'tell application "System Events" to choose from list {"Warrior", "Thief", "Archer", "Magika"} with prompt "What class will you be?"')
+/usr/bin/defaults write "$setChk" avatarClass -string "$avatarClass"
+# Check if the user entered an avatar class
+    if [[ "$avatarClass" == "false" ]]; then
+        echo "No avatar class entered. Exiting."
+        exit 1
+    else
+        echo "You selected: $avatarClass"
+        /usr/bin/defaults write "$setChk" avatarClass -string "$avatarClass"
     fi
+fi
 
 ### Award base points
-if [ "$(defaults read "$setChk" basePoints)" -eq 0 ]; then
-if [ "$myRace" == "Human" ];
+if [ "$(/usr/bin/defaults read "$setChk" basePoints)" -eq 0 ]; then
+if [ "$avatarRace" == "Human" ];
 then
 ### Apply human base points
-defaults write "$setChk" basePoints -int 14
-echo "14 base points added for $myRace race"
+/usr/bin/defaults write "$setChk" basePoints -int 14
+echo "14 base points added for $avatarRace race"
 fi
-if [ "$myRace" == "Elf" ];
+if [ "$avatarRace" == "Elf" ];
 then
 ### Apply elf base points
-defaults write "$setChk" basePoints -int 13
-echo "13 base points added for $myRace race"
+/usr/bin/defaults write "$setChk" basePoints -int 13
+echo "13 base points added for $avatarRace race"
 fi
-if [ "$myRace" == "Draco" ];
+if [ "$avatarRace" == "Draco" ];
 then
 ### Apply draco base points
-defaults write "$setChk" basePoints -int 15
-echo "15 base points added for $myRace race"
+/usr/bin/defaults write "$setChk" basePoints -int 15
+echo "15 base points added for $avatarRace race"
 fi
-if [ "$myRace" == "Titon" ];
+if [ "$avatarRace" == "Titon" ];
 then
 ## Apply titon base points
-defaults write "$setChk" basePoints -int 14
-echo "14 base points added for $myRace race"
+/usr/bin/defaults write "$setChk" basePoints -int 14
+echo "14 base points added for $avatarRace race"
 fi
 else
 echo "Base points already awarded"
+echo "avatarRace: $avatarRace"
 fi
 
 ### Set raceCodes
-if [ -z "$(defaults read "$setChk" raceCode)" ]; then
-if [ "$myRace" == "Human" ];
+if [ "$(/usr/bin/defaults read "$setChk" raceCode)" == 00 ]; then
+if [ "$avatarRace" == "Human" ];
 then
 ### Apply human raceCode for points table
-defaults write "$setChk" raceCode -string 01
-raceCode=$(defaults read "$setChk" raceCode)
+/usr/bin/defaults write "$setChk" raceCode -string 01
+raceCode=$(/usr/bin/defaults read "$setChk" raceCode)
 echo "raceCode: $raceCode"
 fi
-if [ "$myRace" == "Elf" ];
+if [ "$avatarRace" == "Elf" ];
 then
 ### Apply elf raceCode for points table
-defaults write "$setChk" raceCode -string 02
-raceCode=$(defaults read "$setChk" raceCode)
+/usr/bin/defaults write "$setChk" raceCode -string 02
+raceCode=$(/usr/bin/defaults read "$setChk" raceCode)
 echo "raceCode: $raceCode"
 fi
-if [ "$myRace" == "Draco" ];
+if [ "$avatarRace" == "Draco" ];
 then
 ### Apply draco raceCode for points table
-defaults write "$setChk" raceCode -string 03
-raceCode=$(defaults read "$setChk" raceCode)
+/usr/bin/defaults write "$setChk" raceCode -string 03
+raceCode=$(/usr/bin/defaults read "$setChk" raceCode)
 echo "raceCode: $raceCode"
 fi
-if [ "$myRace" == "Titon" ];
+if [ "$avatarRace" == "Titon" ];
 then
 ### Apply titon raceCode for points table
-defaults write "$setChk" raceCode -string 04
-raceCode=$(defaults read "$setChk" raceCode)
+/usr/bin/defaults write "$setChk" raceCode -string 04
+raceCode=$(/usr/bin/defaults read "$setChk" raceCode)
 echo "raceCode: $raceCode"
 fi
 else
-echo "raceCode already set"
+echo "raceCode: $raceCode already set"
 fi
 
 ### Set classCode
-if [ -z "$(defaults read "$setChk" classCode)" ]; then
-if [ "$myClass" == "Warrior" ];
+if [ "$(/usr/bin/defaults read "$setChk" classCode)" == 00 ]; then
+if [ "$avatarClass" == "Warrior" ];
 then
 ### Apply warrior classCode for points table
-defaults write "$setChk" classCode -string 01
-classCode=$(defaults read "$setChk" classCode)
+/usr/bin/defaults write "$setChk" classCode -string 01
+classCode=$(/usr/bin/defaults read "$setChk" classCode)
 echo "classCode: $classCode"
 fi
-if [ "$myClass" == "Thief" ];
+if [ "$avatarClass" == "Thief" ];
 then
 ### Apply thief classCode for points table
-defaults write "$setChk" classCode -string 02
-classCode=$(defaults read "$setChk" classCode)
+/usr/bin/defaults write "$setChk" classCode -string 02
+classCode=$(/usr/bin/defaults read "$setChk" classCode)
 echo "classCode: $classCode"
 fi
-if [ "$myClass" == "Archer" ];
+if [ "$avatarClass" == "Archer" ];
 then
 ### Apply archer classCode for points table
-defaults write "$setChk" classCode -string 03
-classCode=$(defaults read "$setChk" classCode)
+/usr/bin/defaults write "$setChk" classCode -string 03
+classCode=$(/usr/bin/defaults read "$setChk" classCode)
 echo "classCode: $classCode"
 fi
-if [ "$myClass" == "Magika" ];
+if [ "$avatarClass" == "Magika" ];
 then
 ### Apply magika classCode for points table
-defaults write "$setChk" classCode -string 04
-classCode=$(defaults read "$setChk" classCode)
+/usr/bin/defaults write "$setChk" classCode -string 04
+classCode=$(/usr/bin/defaults read "$setChk" classCode)
 echo "classCode: $classCode"
 fi
 else
-echo "classCode already set"
+echo "classCode: $classCode already set"
 fi
 
 ### Set classAttrib
-if [ -z "$(defaults read "$setChk" classAttrib)" ]; then
-if [ "$myClass" == "Warrior" ];
+if [ "$(/usr/bin/defaults read "$setChk" classAttrib)" == 0 ]; then
+if [ "$avatarClass" == "Warrior" ];
 then
 ### Apply warrior classAttrib for points table
-defaults write "$setChk" classAttribAtt -int 4
-defaults write "$setChk" classAttribStr -int 4
-defaults write "$setChk" classAttribSte -int 1
-defaults write "$setChk" classAttribSub -int 2
-defaults write "$setChk" classAttribRan -int 1
-defaults write "$setChk" classAttribCom -int 2
-defaults write "$setChk" classAttribMag -int 2
-echo "$myClass attributes set"
+/usr/bin/defaults write "$setChk" classAttribAtt -int 4
+/usr/bin/defaults write "$setChk" classAttribStr -int 4
+/usr/bin/defaults write "$setChk" classAttribSte -int 1
+/usr/bin/defaults write "$setChk" classAttribSub -int 2
+/usr/bin/defaults write "$setChk" classAttribRan -int 1
+/usr/bin/defaults write "$setChk" classAttribCom -int 2
+/usr/bin/defaults write "$setChk" classAttribMag -int 2
+echo "$avatarClass attributes set"
 fi
-if [ "$myClass" == "Thief" ];
+if [ "$avatarClass" == "Thief" ];
 then
 ### Apply thief classAttrib for points table
-defaults write "$setChk" classAttribAtt -int 4
-defaults write "$setChk" classAttribStr -int 4
-defaults write "$setChk" classAttribSte -int 1
-defaults write "$setChk" classAttribSub -int 2
-defaults write "$setChk" classAttribRan -int 1
-defaults write "$setChk" classAttribCom -int 2
-defaults write "$setChk" classAttribMag -int 2
-echo "$myClass attributes set"
+/usr/bin/defaults write "$setChk" classAttribAtt -int 2
+/usr/bin/defaults write "$setChk" classAttribStr -int 1
+/usr/bin/defaults write "$setChk" classAttribSte -int 4
+/usr/bin/defaults write "$setChk" classAttribSub -int 3
+/usr/bin/defaults write "$setChk" classAttribRan -int 2
+/usr/bin/defaults write "$setChk" classAttribCom -int 3
+/usr/bin/defaults write "$setChk" classAttribMag -int 1
+echo "$avatarClass attributes set"
 fi
-if [ "$myClass" == "Archer" ];
+if [ "$avatarClass" == "Archer" ];
 then
-### Apply warrior classAttrib for points table
-defaults write "$setChk" classAttribAtt -int 4
-defaults write "$setChk" classAttribStr -int 4
-defaults write "$setChk" classAttribSte -int 1
-defaults write "$setChk" classAttribSub -int 2
-defaults write "$setChk" classAttribRan -int 1
-defaults write "$setChk" classAttribCom -int 2
-defaults write "$setChk" classAttribMag -int 2
-echo "$myClass attributes set"
+### Apply archer classAttrib for points table
+/usr/bin/defaults write "$setChk" classAttribAtt -int 3
+/usr/bin/defaults write "$setChk" classAttribStr -int 2
+/usr/bin/defaults write "$setChk" classAttribSte -int 2
+/usr/bin/defaults write "$setChk" classAttribSub -int 1
+/usr/bin/defaults write "$setChk" classAttribRan -int 4
+/usr/bin/defaults write "$setChk" classAttribCom -int 3
+/usr/bin/defaults write "$setChk" classAttribMag -int 1
+echo "$avatarClass attributes set"
 fi
-if [ "$myClass" == "Magika" ];
+if [ "$avatarClass" == "Magika" ];
 then
-### Apply warrior classAttrib for points table
-defaults write "$setChk" classAttribAtt -int 4
-defaults write "$setChk" classAttribStr -int 4
-defaults write "$setChk" classAttribSte -int 1
-defaults write "$setChk" classAttribSub -int 2
-defaults write "$setChk" classAttribRan -int 1
-defaults write "$setChk" classAttribCom -int 2
-defaults write "$setChk" classAttribMag -int 2
-echo "$myClass attributes set"
+### Apply magika classAttrib for points table
+/usr/bin/defaults write "$setChk" classAttribAtt -int 1
+/usr/bin/defaults write "$setChk" classAttribStr -int 1
+/usr/bin/defaults write "$setChk" classAttribSte -int 2
+/usr/bin/defaults write "$setChk" classAttribSub -int 2
+/usr/bin/defaults write "$setChk" classAttribRan -int 3
+/usr/bin/defaults write "$setChk" classAttribCom -int 2
+/usr/bin/defaults write "$setChk" classAttribMag -int 5
+echo "$avatarClass attributes set"
 fi
-defaults write "$setChk" classAttrib -int 1
+/usr/bin/defaults write "$setChk" classAttrib -int 1
 fi
 
+### Set raceAttrib
+if [ "$(/usr/bin/defaults read "$setChk" raceAttrib)" == 0 ]; then
+if [ "$avatarRace" == "Human" ];
+then
+### Apply human raceAttrib for points table
+/usr/bin/defaults write "$setChk" raceAttribAtt -int 2
+/usr/bin/defaults write "$setChk" raceAttribStr -int 2
+/usr/bin/defaults write "$setChk" raceAttribSte -int 2
+/usr/bin/defaults write "$setChk" raceAttribSub -int 2
+/usr/bin/defaults write "$setChk" raceAttribRan -int 2
+/usr/bin/defaults write "$setChk" raceAttribCom -int 2
+/usr/bin/defaults write "$setChk" raceAttribMag -int 2
+echo "$avatarRace attributes set"
+fi
+if [ "$avatarRace" == "Elf" ];
+then
+### Apply elf raceAttrib for points table
+/usr/bin/defaults write "$setChk" raceAttribAtt -int 2
+/usr/bin/defaults write "$setChk" raceAttribStr -int 1
+/usr/bin/defaults write "$setChk" raceAttribSte -int 2
+/usr/bin/defaults write "$setChk" raceAttribSub -int 2
+/usr/bin/defaults write "$setChk" raceAttribRan -int 3
+/usr/bin/defaults write "$setChk" raceAttribCom -int 3
+/usr/bin/defaults write "$setChk" raceAttribMag -int 1
+echo "$avatarRace attributes set"
+fi
+if [ "$avatarRace" == "Draco" ];
+then
+### Apply draco raceAttrib for points table
+/usr/bin/defaults write "$setChk" raceAttribAtt -int 3
+/usr/bin/defaults write "$setChk" raceAttribStr -int 3
+/usr/bin/defaults write "$setChk" raceAttribSte -int 1
+/usr/bin/defaults write "$setChk" raceAttribSub -int 1
+/usr/bin/defaults write "$setChk" raceAttribRan -int 4
+/usr/bin/defaults write "$setChk" raceAttribCom -int 1
+/usr/bin/defaults write "$setChk" raceAttribMag -int 1
+echo "$avatarRace attributes set"
+fi
+if [ "$avatarRace" == "Titon" ];
+then
+### Apply titon raceAttrib for points table
+/usr/bin/defaults write "$setChk" raceAttribAtt -int 3
+/usr/bin/defaults write "$setChk" raceAttribStr -int 2
+/usr/bin/defaults write "$setChk" raceAttribSte -int 2
+/usr/bin/defaults write "$setChk" raceAttribSub -int 1
+/usr/bin/defaults write "$setChk" raceAttribRan -int 2
+/usr/bin/defaults write "$setChk" raceAttribCom -int 2
+/usr/bin/defaults write "$setChk" raceAttribMag -int 2
+echo "$avatarClass attributes set"
+fi
+/usr/bin/defaults write "$setChk" raceAttrib -int 1
+fi
 
+raceAtt=$(/usr/bin/defaults read "$setChk" raceAttribAtt)
+classAtt=$(/usr/bin/defaults read "$setChk" classAttribAtt)
+raceStr=$(/usr/bin/defaults read "$setChk" raceAttribStr)
+classStr=$(/usr/bin/defaults read "$setChk" classAttribStr)
+raceSte=$(/usr/bin/defaults read "$setChk" raceAttribSte)
+classSte=$(/usr/bin/defaults read "$setChk" classAttribSte)
+raceSub=$(/usr/bin/defaults read "$setChk" raceAttribSub)
+classSub=$(/usr/bin/defaults read "$setChk" classAttribSub)
+raceRan=$(/usr/bin/defaults read "$setChk" raceAttribRan)
+classRan=$(/usr/bin/defaults read "$setChk" classAttribRan)
+raceCom=$(/usr/bin/defaults read "$setChk" raceAttribCom)
+classCom=$(/usr/bin/defaults read "$setChk" classAttribCom)
+raceMag=$(/usr/bin/defaults read "$setChk" raceAttribMag)
+classMag=$(/usr/bin/defaults read "$setChk" classAttribMag)
 
-defaults write "$setChk" setDone -int 1
+attribAtt=$(( $raceAtt + $classAtt ))
+/usr/bin/defaults write "$setChk" attribAtt "$attribAtt"
+echo "Attack: $attribAtt"
+attribStr=$(( $raceStr + $classStr ))
+/usr/bin/defaults write "$setChk" attribStr "$attribStr"
+echo "Strength: $attribStr"
+attribSte=$(( $raceSte + $classSte ))
+/usr/bin/defaults write "$setChk" attribSte "$attribSte"
+echo "Stealth: $attribSte"
+attribSub=$(( $raceSub + $classSub ))
+/usr/bin/defaults write "$setChk" attribSub "$attribSub"
+echo "Subterfuge: $attribSub"
+attribRan=$(( $raceRan + $classRan ))
+/usr/bin/defaults write "$setChk" attribRan "$attribRan"
+echo "Range: $attribRan"
+attribCom=$(( $raceCom + $classCom ))
+/usr/bin/defaults write "$setChk" attribCom "$attribCom"
+echo "Composure: $attribCom"
+attribMag=$(( $raceMag + $classMag ))
+/usr/bin/defaults write "$setChk" attribMag "$attribMag"
+echo "Magic: $attribMag"
+
+/usr/bin/defaults write "$setChk" setDone -int 1
+
+### Build csv file from data collected
+printf "Account: Avatar name,Race,Class,Gender,Attack,Strength,Stealth,Subterfuge,Range,Composure,Magic%s\n\
+$avatarName,$avatarRace,$avatarClass,$avatarGender,$attribAtt,$attribStr,$attribSte,$attribSub,$attribRan,$attribCom,$attribMag "\
+> ~/Desktop/Character_Sheet_${avatarName}.csv
