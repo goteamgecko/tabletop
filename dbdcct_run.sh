@@ -2,7 +2,7 @@
 
 # Define plist
 currentUser=$(stat -f %Su /dev/console)
-prefList="com.goteamgecko.tabletop.game.plist"
+prefList="com.goteamgecko.tabletop.charactercreator.plist"
 setChk="/Users/$currentUser/Library/Preferences/$prefList"
 
 # Check if plist exists and if not, create it
