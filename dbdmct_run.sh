@@ -106,7 +106,7 @@ if [[ "$monsterRace" == "false" ]]; then
 ### Open a dialog box and ask the user for their Monster's race
 monsterRace=$(osascript -e 'tell application "System Events" to choose from list {"Shark", "Hawk", "Dino", "Worm"} with prompt "What race will your monster be?"')
 /usr/bin/defaults write "$setChk" monsterRace -string "$monsterRace"
-# Check if the user entered an Monster race
+# Check if the user entered a monster race
     if [[ "$monsterRace" == "false" ]]; then
         echo "No monster race entered. Exiting."
         exit 1
@@ -125,7 +125,7 @@ if [[ "$monsterLevel" == "false" ]]; then
 monsterLevel=$(osascript -e 'tell application "System Events" to choose from list {"Level 01", "Level 02", "Level 03"} with prompt "What Level will your monster be?"')
 echo "Monster genger: $monsterLevel"
 /usr/bin/defaults write "$setChk" monsterLevel -string "$monsterLevel"
-# Check if the user entered an Monster race
+# Check if the user entered a monster race
     if [[ "$monsterLevel" == "false" ]]; then
         echo "No Monster level entered. Exiting."
         exit 1
@@ -144,7 +144,7 @@ if [[ "$monsterClass" == "false" ]]; then
 ### Open a dialog box and ask the user for their Monster's class
 monsterClass=$(osascript -e 'tell application "System Events" to choose from list {"Rage", "Dark", "Dire", "Mystic"} with prompt "What class will you be?"')
 /usr/bin/defaults write "$setChk" monsterClass -string "$monsterClass"
-# Check if the user entered an Monster class
+# Check if the user entered a monster class
     if [[ "$monsterClass" == "false" ]]; then
         echo "No monster class entered. Exiting."
         exit 1
